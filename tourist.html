@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tourist dashboard of TourBD">
+  <title>Tourist Dashboard | TourBD Tour Management</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">Tour<span>BD</span></a>
+    <div class="user-info">
+      <span class="badge tourist">Tourist</span>
+      <span>Welcome, <span id="welcomeName">Tourist</span></span>
+      <a href="index.html" class="btn btn-small btn-light">Logout</a>
+    </div>
+  </header>
+
+  <nav class="topnav">
+    <button type="button" id="nav-bookingsSection" onclick="showSection('bookingsSection')">My Bookings</button>
+    <button type="button" id="nav-paymentSection" onclick="showSection('paymentSection')">Payment</button>
+    <button type="button" id="nav-reviewsSection" onclick="showSection('reviewsSection')">Reviews &amp; Ratings</button>
+    <button type="button" id="nav-requestsSection" onclick="showSection('requestsSection')">Special Request</button>
+    <button type="button" id="nav-catalogSection" onclick="showSection('catalogSection')">Search Tours</button>
+  </nav>
+
+  <main class="container">
+
+    <!-- =========================================================
+         MY BOOKINGS: Create, Read, Update, Delete and Search
+         ========================================================= -->
+    <section id="bookingsSection" class="page-section">
+      <h2 class="page-title">My Bookings</h2>
+      <p class="page-subtitle">Book a tour package. You can edit or cancel a booking while it is pending.</p>
+
+      <div id="bookingMessage" class="message"></div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3 id="bookingFormTitle">Book a Tour</h3>
+            <form id="bookingForm" onsubmit="return saveBooking()">
+              <fieldset>
+                <legend>Booking Details</legend>
+                <table class="form-table">
+                  <tr>
+                    <td><label for="bookingPackage">Tour package:</label></td>
+                    <td>
+                      <select id="bookingPackage" onchange="updateBookingTotal()"></select>
+                      <span class="error" id="bookingPackageError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="bookingDate">Travel date:</label></td>
+                    <td>
+                      <input type="date" id="bookingDate" onchange="updateBookingTotal()">
+                      <span class="error" id="bookingDateError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="bookingPersons">Persons:</label></td>
+                    <td>
+                      <input type="number" id="bookingPersons" min="1" max="10" value="1" onkeyup="updateBookingTotal()" onchange="updateBookingTotal()">
+                      <span class="error" id="bookingPersonsError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Pickup from:</td>
+                    <td>
+                      <input type="radio" id="pickupDhaka" name="pickup" value="Dhaka">
+                      <label for="pickupDhaka" class="option-label">Dhaka</label>
+                      <input type="radio" id="pickupCtg" name="pickup" value="Chattogram">
+                      <label for="pickupCtg" class="option-label">Chattogram</label>
+                      <input type="radio" id="pickupSylhet" name="pickup" value="Sylhet">
+                      <label for="pickupSylhet" class="option-label">Sylhet</label>
+                      <span class="error" id="pickupError"></span>
+                    </td>
+                  </tr>
+                </table>
+              </fieldset>
+              <div class="result-box" id="bookingTotal">Choose a package to see the price.</div>
+              <p class="form-buttons">
+                <input type="submit" id="bookingSaveButton" class="btn" value="Book Now">
+                <button type="button" class="btn btn-secondary" onclick="resetBookingForm()">Cancel</button>
+              </p>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-wide">
+          <div class="card">
+            <h3>My bookings</h3>
+            <div class="search-bar">
+              <input type="text" id="bookingSearch" placeholder="Search by package or booking id..." onkeyup="renderBookings()">
+              <select id="bookingStatusFilter" onchange="renderBookings()">
+                <option value="All">Any status</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Completed">Completed</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+            <p class="result-count" id="bookingCount"></p>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr><th>ID</th><th>Package</th><th>Travel date</th><th>Persons</th><th>Total</th><th>Status</th><th>Payment</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="bookingTableBody"></tbody>
+              </table>
+            </div>
+            <p class="hint">Only pending bookings can be edited or cancelled.</p>
+          </div>
+
+          <div class="card">
+            <h3>Booking details</h3>
+            <div id="bookingDetails"><p class="hint">Click "Details" on a booking to see its route, guide, vehicle and notices.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         UNIQUE FEATURE 1: PAYMENT SYSTEM
+         ========================================================= -->
+    <section id="paymentSection" class="page-section">
+      <h2 class="page-title">Payment</h2>
+      <p class="page-subtitle">Pay for a booking after the agency approves it. This is a demo, no real money is taken.</p>
+
+      <div id="paymentMessage" class="message"></div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3>Make a payment</h3>
+            <form id="paymentForm" onsubmit="return makePayment()">
+              <fieldset>
+                <legend>Booking</legend>
+                <table class="form-table">
+                  <tr>
+                    <td><label for="payBooking">Approved booking:</label></td>
+                    <td>
+                      <select id="payBooking" onchange="previewPayment()"></select>
+                      <span class="error" id="payBookingError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Pay with:</td>
+                    <td>
+                      <input type="radio" id="methodBkash" name="payMethod" value="bKash" onchange="showPaymentFields()">
+                      <label for="methodBkash" class="option-label">bKash</label>
+                      <input type="radio" id="methodNagad" name="payMethod" value="Nagad" onchange="showPaymentFields()">
+                      <label for="methodNagad" class="option-label">Nagad</label>
+                      <input type="radio" id="methodCard" name="payMethod" value="Card" onchange="showPaymentFields()">
+                      <label for="methodCard" class="option-label">Card</label>
+                      <span class="error" id="payMethodError"></span>
+                    </td>
+                  </tr>
+                </table>
+              </fieldset>
+
+              <!-- Shown for bKash and Nagad -->
+              <fieldset id="walletFields" class="method-fields">
+                <legend id="walletLegend">Wallet</legend>
+                <table class="form-table">
+                  <tr>
+                    <td><label for="walletNumber">Account number:</label></td>
+                    <td>
+                      <input type="tel" id="walletNumber" placeholder="11 digits, e.g. 01712345678">
+                      <span class="error" id="walletNumberError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="walletPin">PIN:</label></td>
+                    <td>
+                      <input type="password" id="walletPin" placeholder="4 or 5 digits">
+                      <span class="error" id="walletPinError"></span>
+                    </td>
+                  </tr>
+                </table>
+              </fieldset>
+
+              <!-- Shown for Card -->
+              <fieldset id="cardFields" class="method-fields">
+                <legend>Debit / Credit card</legend>
+                <table class="form-table">
+                  <tr>
+                    <td><label for="cardNumber">Card number:</label></td>
+                    <td>
+                      <input type="text" id="cardNumber" placeholder="16 digits">
+                      <span class="error" id="cardNumberError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="cardExpiry">Expiry (MM/YY):</label></td>
+                    <td>
+                      <input type="text" id="cardExpiry" placeholder="e.g. 08/28">
+                      <span class="error" id="cardExpiryError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="cardCvv">CVV:</label></td>
+                    <td>
+                      <input type="password" id="cardCvv" placeholder="3 digits">
+                      <span class="error" id="cardCvvError"></span>
+                    </td>
+                  </tr>
+                </table>
+              </fieldset>
+
+              <input type="submit" id="payButton" class="btn btn-success" value="Pay">
+            </form>
+            <div class="result-box" id="payPreview">Choose a booking to see the amount.</div>
+            <div id="receiptBox"></div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <h3>Payment history</h3>
+            <p class="result-count" id="paidTotal"></p>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Transaction</th><th>Booking</th><th>Method</th><th>Amount</th><th>Date</th></tr>
+                </thead>
+                <tbody id="paymentTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         UNIQUE FEATURE 2: REVIEWS AND RATINGS
+         ========================================================= -->
+    <section id="reviewsSection" class="page-section">
+      <h2 class="page-title">Reviews &amp; Ratings</h2>
+      <p class="page-subtitle">Rate a tour and your guide after the tour is completed.</p>
+
+      <div id="reviewMessage" class="message"></div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3>Write a review</h3>
+            <form id="reviewForm" onsubmit="return saveReview()">
+              <fieldset>
+                <legend>Your tour</legend>
+                <table class="form-table">
+                  <tr>
+                    <td><label for="reviewBooking">Completed tour:</label></td>
+                    <td>
+                      <select id="reviewBooking" onchange="showReviewGuide()"></select>
+                      <span class="error" id="reviewBookingError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Tour rating:</td>
+                    <td class="star-choice">
+                      <input type="radio" id="tour1" name="tourRating" value="1"><label for="tour1">1</label>
+                      <input type="radio" id="tour2" name="tourRating" value="2"><label for="tour2">2</label>
+                      <input type="radio" id="tour3" name="tourRating" value="3"><label for="tour3">3</label>
+                      <input type="radio" id="tour4" name="tourRating" value="4"><label for="tour4">4</label>
+                      <input type="radio" id="tour5" name="tourRating" value="5"><label for="tour5">5 &#9733;</label>
+                      <span class="error" id="tourRatingError"></span>
+                    </td>
+                  </tr>
+                  <tr id="guideRatingRow">
+                    <td>Guide rating:<br><span class="hint" id="reviewGuideName"></span></td>
+                    <td class="star-choice">
+                      <input type="radio" id="guide1" name="guideRating" value="1"><label for="guide1">1</label>
+                      <input type="radio" id="guide2" name="guideRating" value="2"><label for="guide2">2</label>
+                      <input type="radio" id="guide3" name="guideRating" value="3"><label for="guide3">3</label>
+                      <input type="radio" id="guide4" name="guideRating" value="4"><label for="guide4">4</label>
+                      <input type="radio" id="guide5" name="guideRating" value="5"><label for="guide5">5 &#9733;</label>
+                      <span class="error" id="guideRatingError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="reviewComment">Comment:</label></td>
+                    <td>
+                      <textarea id="reviewComment" rows="4" cols="30" placeholder="How was the tour?" onkeyup="countCommentCharacters()"></textarea>
+                      <span class="hint" id="commentCounter">0 / 300</span>
+                      <span class="error" id="reviewCommentError"></span>
+                    </td>
+                  </tr>
+                </table>
+              </fieldset>
+              <input type="submit" class="btn" value="Submit Review">
+            </form>
+          </div>
+        </div>
+
+        <div class="col-wide">
+          <div class="card">
+            <h3>My reviews</h3>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Tour</th><th>Tour rating</th><th>Guide</th><th>Comment</th><th>Date</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="reviewTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         UNIQUE FEATURE 3: SPECIAL REQUEST
+         ========================================================= -->
+    <section id="requestsSection" class="page-section">
+      <h2 class="page-title">Special Request</h2>
+      <p class="page-subtitle">Ask the agency for something extra: food, room, pickup or help on the tour.</p>
+
+      <div id="requestMessage" class="message"></div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3 id="requestFormTitle">New Request</h3>
+            <form id="requestForm" onsubmit="return saveRequest()">
+              <fieldset>
+                <legend>Request Details</legend>
+                <table class="form-table">
+                  <tr>
+                    <td><label for="requestBooking">For booking:</label></td>
+                    <td>
+                      <select id="requestBooking"></select>
+                      <span class="error" id="requestBookingError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="requestType">Request type:</label></td>
+                    <td>
+                      <select id="requestType" onchange="showRequestHint()">
+                        <option value="">-- Select Type --</option>
+                        <option value="Food">Food / Meal</option>
+                        <option value="Room">Room / Hotel</option>
+                        <option value="Pickup">Pickup / Drop</option>
+                        <option value="Medical">Medical / Wheelchair</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <span class="error" id="requestTypeError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="requestDetails">Details:</label></td>
+                    <td>
+                      <textarea id="requestDetails" rows="4" cols="30" placeholder="Tell the agency what you need..." onkeyup="countRequestCharacters()"></textarea>
+                      <span class="hint" id="requestCounter">0 / 200</span>
+                      <span class="error" id="requestDetailsError"></span>
+                    </td>
+                  </tr>
+                </table>
+              </fieldset>
+              <input type="submit" id="requestSaveButton" class="btn" value="Send Request">
+              <button type="button" class="btn btn-secondary" onclick="resetRequestForm()">Cancel</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-wide">
+          <div class="card">
+            <h3>My requests</h3>
+            <div class="search-bar">
+              <input type="text" id="requestSearch" placeholder="Search by details or id..." onkeyup="renderRequests()">
+              <select id="requestStatusFilter" onchange="renderRequests()">
+                <option value="All">Any status</option>
+                <option value="Pending">Pending</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Declined">Declined</option>
+              </select>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr><th>ID</th><th>Booking</th><th>Type</th><th>Details</th><th>Status</th><th>Agency reply</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="requestTableBody"></tbody>
+              </table>
+            </div>
+            <p class="hint">Only pending requests can be edited or removed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         SEARCH TOURS (read only)
+         ========================================================= -->
+    <section id="catalogSection" class="page-section">
+      <h2 class="page-title">Search Tours</h2>
+      <p class="page-subtitle">Find a package by place, category or budget.</p>
+
+      <div class="card">
+        <div class="search-bar">
+          <input type="text" id="catalogSearch" placeholder="Search by place, package or stop..." onkeyup="renderCatalog()">
+          <select id="catalogCategory" onchange="renderCatalog()">
+            <option value="All">All categories</option>
+            <option value="Beach">Beach</option>
+            <option value="Hill">Hill</option>
+            <option value="Eco-Tour">Eco-Tour</option>
+            <option value="City Tour">City Tour</option>
+          </select>
+          <select id="catalogBudget" onchange="renderCatalog()">
+            <option value="0">Any budget</option>
+            <option value="2000">Up to 2,000 Tk</option>
+            <option value="7000">Up to 7,000 Tk</option>
+            <option value="10000">Up to 10,000 Tk</option>
+          </select>
+        </div>
+        <p class="result-count" id="catalogCount"></p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>Package</th><th>Destination</th><th>Category</th><th>Duration</th><th>Price / person</th><th>Rating</th></tr>
+            </thead>
+            <tbody id="catalogBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    &copy; 2026 TourBD Tour Management System &middot; CSC 3215 Web Technologies
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/tourist.js"></script>
+</body>
+</html>
