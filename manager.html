@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agency manager dashboard of TourBD">
+    <title>Agency Manager Dashboard | TourBD Tour Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <a href="index.html" class="logo">Tour<span>BD</span></a>
+        <div class="user-info">
+            <span class="badge manager">Agency Manager</span>
+            <span>Welcome, <span id="welcomeName">Manager</span></span>
+            <a href="index.html" class="btn btn-small btn-light">Logout</a>
+        </div>
+    </header>
+
+    <nav class="topnav">
+        <button type="button" id="nav-packagesSection" onclick="showSection('packagesSection')">Manage Packages</button>
+        <button type="button" id="nav-approvalSection" onclick="showSection('approvalSection')">Booking
+            Approval</button>
+        <button type="button" id="nav-guideSection" onclick="showSection('guideSection')">Guide Assignment</button>
+        <button type="button" id="nav-vehicleSection" onclick="showSection('vehicleSection')">Vehicle Assign &amp;
+            Booking</button>
+        <button type="button" id="nav-requestsSection" onclick="showSection('requestsSection')">Special
+            Requests</button>
+    </nav>
+
+    <main class="container">
+
+        <!-- MANAGE PACKAGES: Create, Read, Update, Delete and Search -->
+        <section id="packagesSection" class="page-section">
+            <h2 class="page-title">Manage Tour Packages</h2>
+            <p class="page-subtitle">Create, view, edit, delete and search the tour packages tourists can book.</p>
+
+            <div id="packageMessage" class="message"></div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <h3 id="packageFormTitle">Add Package</h3>
+                        <form id="packageForm" onsubmit="return savePackage()">
+                            <fieldset>
+                                <legend>Package Details</legend>
+                                <table class="form-table">
+                                    <tr>
+                                        <td><label for="packageName">Package name:</label></td>
+                                        <td>
+                                            <input type="text" id="packageName" placeholder="e.g. Bandarban Hill Trip">
+                                            <span class="error" id="packageNameError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="packageDestination">Destination:</label></td>
+                                        <td>
+                                            <input type="text" id="packageDestination" placeholder="e.g. Bandarban">
+                                            <span class="error" id="packageDestinationError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="packageCategory">Category:</label></td>
+                                        <td>
+                                            <select id="packageCategory">
+                                                <option value="">Select Category</option>
+                                                <option value="Beach">Beach</option>
+                                                <option value="Hill">Hill</option>
+                                                <option value="Eco-Tour">Eco-Tour</option>
+                                                <option value="City Tour">City Tour</option>
+                                            </select>
+                                            <span class="error" id="packageCategoryError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="packageDays">Days:</label></td>
+                                        <td>
+                                            <input type="number" id="packageDays" min="1" max="15">
+                                            <span class="error" id="packageDaysError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="packagePrice">Price / person (Tk):</label></td>
+                                        <td>
+                                            <input type="number" id="packagePrice" min="500" max="200000">
+                                            <span class="error" id="packagePriceError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="packageSeats">Seats per date:</label></td>
+                                        <td>
+                                            <input type="number" id="packageSeats" min="1" max="60">
+                                            <span class="error" id="packageSeatsError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="packageIncludes">Includes:</label></td>
+                                        <td>
+                                            <input type="text" id="packageIncludes"
+                                                placeholder="Hotel, meals, transport, guide">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="packageRoute">Route:</label></td>
+                                        <td>
+                                            <textarea id="packageRoute" rows="3" cols="30"
+                                                placeholder="Stops separated by commas: Dhaka, Bandarban, Nilgiri"
+                                                onkeyup="previewPackageRoute()"></textarea>
+                                            <span class="hint" id="routePreview"></span>
+                                            <span class="error" id="packageRouteError"></span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                            <input type="submit" id="packageSaveButton" class="btn" value="Add Package">
+                            <button type="button" class="btn btn-secondary" onclick="resetPackageForm()">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-wide">
+                    <div class="card">
+                        <h3>All packages</h3>
+                        <div class="search-bar">
+                            <input type="text" id="packageSearch" placeholder="Search by name, place or id..."
+                                onkeyup="renderPackages()">
+                            <select id="packageCategoryFilter" onchange="renderPackages()">
+                                <option value="All">All categories</option>
+                                <option value="Beach">Beach</option>
+                                <option value="Hill">Hill</option>
+                                <option value="Eco-Tour">Eco-Tour</option>
+                                <option value="City Tour">City Tour</option>
+                            </select>
+                        </div>
+                        <p class="result-count" id="packageCount"></p>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Package</th>
+                                        <th>Category</th>
+                                        <th>Days</th>
+                                        <th>Price</th>
+                                        <th>Seats</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="packageTableBody"></tbody>
+                            </table>
+                        </div>
+                        <p class="hint">A package with the status Disabled was stopped by the admin because of low
+                            ratings.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 
+         UNIQUE FEATURE 1: BOOKING APPROVAL MANAGEMENT
+         -->
+        <section id="approvalSection" class="page-section">
+            <h2 class="page-title">Booking Approval</h2>
+            <p class="page-subtitle">Approve a booking only when there are enough seats on its travel date.</p>
+
+            <div id="approvalMessage" class="message"></div>
+
+            <div class="row">
+                <div class="col-wide">
+                    <div class="card">
+                        <h3>Waiting for approval</h3>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tourist</th>
+                                        <th>Package</th>
+                                        <th>Travel date</th>
+                                        <th>Persons</th>
+                                        <th>Total</th>
+                                        <th>Seats left</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <h3>Seat check</h3>
+                        <div id="seatCheck">
+                            <p class="hint">Click "Check" on a booking to see the seats on that date.</p>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="seatBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>All bookings</h3>
+                <div class="search-bar">
+                    <input type="text" id="allBookingSearch" placeholder="Search by tourist, package or id..."
+                        onkeyup="renderAllBookings()">
+                    <select id="allBookingFilter" onchange="renderAllBookings()">
+                        <option value="All">Any status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <p class="result-count" id="allBookingCount"></p>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tourist</th>
+                                <th>Package</th>
+                                <th>Travel date</th>
+                                <th>Persons</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allBookingBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 
+        UNIQUE FEATURE 2: GUIDE ASSIGNMENT
+        -->
+        <section id="guideSection" class="page-section">
+            <h2 class="page-title">Guide Assignment</h2>
+            <p class="page-subtitle">Give every approved booking a guide. A guide who already has a tour on those dates
+                can not be chosen.</p>
+
+            <div id="guideMessage" class="message"></div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <h3>Assign a guide</h3>
+                        <form id="assignForm" onsubmit="return assignGuide()">
+                            <fieldset>
+                                <legend>Tour and guide</legend>
+                                <table class="form-table">
+                                    <tr>
+                                        <td><label for="assignBooking">Approved booking:</label></td>
+                                        <td>
+                                            <select id="assignBooking" onchange="markBusyGuides()"></select>
+                                            <span class="error" id="assignBookingError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="assignGuideSelect">Tour guide:</label></td>
+                                        <td>
+                                            <select id="assignGuideSelect"></select>
+                                            <span class="hint" id="guideHint"></span>
+                                            <span class="error" id="assignGuideSelectError"></span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                            <input type="submit" class="btn" value="Assign Guide">
+                        </form>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <h3>Guide workload (tours not finished)</h3>
+                        <div id="workloadChart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Current assignments</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Booking</th>
+                                <th>Package</th>
+                                <th>Dates</th>
+                                <th>Guide</th>
+                                <th>Tour status</th>
+                                <th>Change guide</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assignmentTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 
+        UNIQUE FEATURE 3: VEHICLE ASSIGN AND BOOKING
+        -->
+        <section id="vehicleSection" class="page-section">
+            <h2 class="page-title">Vehicle Assign &amp; Booking</h2>
+            <p class="page-subtitle">Book a vehicle for a tour. It must have enough seats and be free on those dates.
+            </p>
+
+            <div id="vehicleMessage" class="message"></div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <h3>Book a vehicle for a tour</h3>
+                        <form id="vehicleBookForm" onsubmit="return bookVehicle()">
+                            <fieldset>
+                                <legend>Tour and vehicle</legend>
+                                <table class="form-table">
+                                    <tr>
+                                        <td><label for="vbBooking">Approved booking:</label></td>
+                                        <td>
+                                            <select id="vbBooking" onchange="fillVehicleDates()"></select>
+                                            <span class="error" id="vbBookingError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="vbStart">From:</label></td>
+                                        <td>
+                                            <input type="date" id="vbStart" onchange="markVehicles()">
+                                            <span class="error" id="vbStartError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="vbEnd">To:</label></td>
+                                        <td>
+                                            <input type="date" id="vbEnd" onchange="markVehicles()">
+                                            <span class="error" id="vbEndError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="vbVehicle">Vehicle:</label></td>
+                                        <td>
+                                            <select id="vbVehicle"></select>
+                                            <span class="hint" id="vehicleHint"></span>
+                                            <span class="error" id="vbVehicleError"></span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                            <input type="submit" class="btn" value="Book Vehicle">
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card">
+                        <h3 id="vehicleFormTitle">Add Vehicle</h3>
+                        <form id="vehicleForm" onsubmit="return saveVehicle()">
+                            <fieldset>
+                                <legend>Vehicle Details</legend>
+                                <table class="form-table">
+                                    <tr>
+                                        <td><label for="vehicleNumber">Number plate:</label></td>
+                                        <td>
+                                            <input type="text" id="vehicleNumber"
+                                                placeholder="e.g. DHAKA METRO-GA-11-1234">
+                                            <span class="error" id="vehicleNumberError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="vehicleType">Type:</label></td>
+                                        <td>
+                                            <select id="vehicleType">
+                                                <option value="">-- Select Type --</option>
+                                                <option value="Bus">Bus</option>
+                                                <option value="Microbus">Microbus</option>
+                                                <option value="Car">Car</option>
+                                                <option value="Jeep">Jeep</option>
+                                                <option value="Boat">Boat</option>
+                                            </select>
+                                            <span class="error" id="vehicleTypeError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="vehicleSeats">Seats:</label></td>
+                                        <td>
+                                            <input type="number" id="vehicleSeats" min="2" max="60">
+                                            <span class="error" id="vehicleSeatsError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="vehicleDriver">Driver name:</label></td>
+                                        <td>
+                                            <input type="text" id="vehicleDriver">
+                                            <span class="error" id="vehicleDriverError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><label for="vehicleDriverPhone">Driver phone:</label></td>
+                                        <td>
+                                            <input type="tel" id="vehicleDriverPhone" placeholder="01XXXXXXXXX">
+                                            <span class="error" id="vehicleDriverPhoneError"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Status:</td>
+                                        <td>
+                                            <input type="radio" id="vehicleAvailable" name="vehicleStatus"
+                                                value="Available" checked>
+                                            <label for="vehicleAvailable" class="option-label">Available</label>
+                                            <input type="radio" id="vehicleMaintenance" name="vehicleStatus"
+                                                value="Maintenance">
+                                            <label for="vehicleMaintenance" class="option-label">Maintenance</label>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                            <input type="submit" id="vehicleSaveButton" class="btn" value="Add Vehicle">
+                            <button type="button" class="btn btn-secondary" onclick="resetVehicleForm()">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Vehicle bookings</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Vehicle</th>
+                                <th>Driver</th>
+                                <th>Booking</th>
+                                <th>Dates</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vehicleBookingBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Fleet</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Number</th>
+                                <th>Type</th>
+                                <th>Seats</th>
+                                <th>Driver</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vehicleTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!--
+         SPECIAL REQUESTS FROM TOURISTS
+         -->
+        <section id="requestsSection" class="page-section">
+            <h2 class="page-title">Special Requests</h2>
+            <p class="page-subtitle">Reply to what tourists asked for. Accept or decline with a short message.</p>
+
+            <div id="requestMessage" class="message"></div>
+
+            <div class="card">
+                <div class="search-bar">
+                    <select id="requestFilter" onchange="renderRequests()">
+                        <option value="Pending">Pending</option>
+                        <option value="All">All requests</option>
+                    </select>
+                </div>
+                <div id="requestList"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        &copy; 2026 TourBD Tour Management System &middot; CSC 3215 Web Technologies
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/manager.js"></script>
+</body>
+
+</html>
