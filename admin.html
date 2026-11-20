@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Admin dashboard of TourBD">
+  <title>Admin Dashboard | TourBD Tour Management</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="header">
+    <a href="index.html" class="logo">Tour<span>BD</span></a>
+    <div class="user-info">
+      <span class="badge admin">Admin</span>
+      <span>Welcome, <span id="welcomeName">Araf Abdullah</span></span>
+      <a href="index.html" class="btn btn-small btn-light">Logout</a>
+    </div>
+  </header>
+
+  <!-- ============ NAVIGATION: each button shows one section ============ -->
+  <nav class="topnav">
+    <button type="button" id="nav-reportSection" onclick="showSection('reportSection')">Analytics &amp; Reports</button>
+    <button type="button" id="nav-usersSection" onclick="showSection('usersSection')">Manage Users</button>
+    <button type="button" id="nav-ratingSection" onclick="showSection('ratingSection')">Action by Rating</button>
+    <button type="button" id="nav-revenueSection" onclick="showSection('revenueSection')">See Revenue</button>
+  </nav>
+
+  <main class="container">
+
+    <!-- =========================================================
+         UNIQUE FEATURE 3: SYSTEM ANALYTICS & REPORTS
+         Counts are worked out with loops over the data arrays.
+         ========================================================= -->
+    <section id="reportSection" class="page-section">
+      <h2 class="page-title">System Analytics &amp; Reports</h2>
+      <p class="page-subtitle">A live summary of users, packages, bookings and tours.
+        <span id="reportTime" class="hint"></span></p>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="statUsers">0</div><div class="stat-label">Total users</div></div>
+        <div class="stat-card"><div class="stat-number" id="statPendingUsers">0</div><div class="stat-label">Waiting for approval</div></div>
+        <div class="stat-card"><div class="stat-number" id="statPackages">0</div><div class="stat-label">Tour packages</div></div>
+        <div class="stat-card"><div class="stat-number" id="statBookings">0</div><div class="stat-label">Total bookings</div></div>
+        <div class="stat-card"><div class="stat-number" id="statTravellers">0</div><div class="stat-label">Travellers (approved + completed)</div></div>
+        <div class="stat-card"><div class="stat-number" id="statAvgRating">0</div><div class="stat-label">Average tour rating</div></div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3>Users by role</h3>
+            <div id="roleChart"></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3>Bookings by status</h3>
+            <div id="bookingStatusChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3>Tour status (updated by guides)</h3>
+            <div id="tourStatusChart"></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3>Bookings by category</h3>
+            <div id="categoryChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Package status breakdown</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>Package</th><th>Status</th><th>Pending</th><th>Approved</th><th>Completed</th><th>Rejected</th><th>Rating</th><th>Revenue</th></tr>
+            </thead>
+            <tbody id="packageReportBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <button type="button" class="btn" onclick="generateReport()">Refresh report</button>
+      <button type="button" class="btn btn-secondary" onclick="window.print()">Print report</button>
+    </section>
+
+
+    <!-- =========================================================
+         MANAGE USERS: Create, Read, Update, Delete and Search
+         ========================================================= -->
+    <section id="usersSection" class="page-section">
+      <h2 class="page-title">Manage Users</h2>
+      <p class="page-subtitle">Create, view, edit, delete and search user accounts. New admins can only be added here;
+        tourists, guides and managers sign up on the registration page. New guides and managers wait as <em>Pending</em> until you approve them.</p>
+
+      <div id="userMessage" class="message"></div>
+
+      <div class="row">
+        <!-- CREATE / UPDATE form -->
+        <div class="col">
+          <div class="card">
+            <h3 id="userFormTitle">Add New User</h3>
+            <form id="userForm" onsubmit="return saveUser()">
+              <fieldset>
+                <legend>User Details</legend>
+                <table class="form-table">
+                  <tr>
+                    <td><label for="userName">Full Name:</label></td>
+                    <td>
+                      <input type="text" id="userName" placeholder="e.g. Nadia Islam">
+                      <span class="error" id="userNameError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="userUsername">Username:</label></td>
+                    <td>
+                      <input type="text" id="userUsername" placeholder="At least 4 characters">
+                      <span class="error" id="userUsernameError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="userEmail">Email:</label></td>
+                    <td>
+                      <input type="email" id="userEmail" placeholder="name@tourbd.com">
+                      <span class="error" id="userEmailError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="userPassword">Password:</label></td>
+                    <td>
+                      <input type="password" id="userPassword" placeholder="At least 8 characters">
+                      <span class="error" id="userPasswordError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="userRole">Role:</label></td>
+                    <td>
+                      <select id="userRole">
+                        <option value="">-- Select Role --</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Agency Manager">Agency Manager</option>
+                        <option value="Tour Guide">Tour Guide</option>
+                        <option value="Tourist">Tourist</option>
+                      </select>
+                      <span class="error" id="userRoleError"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Status:</td>
+                    <td>
+                      <input type="radio" id="statusActive" name="userStatus" value="Active" checked>
+                      <label for="statusActive" class="option-label">Active</label>
+                      <input type="radio" id="statusBlocked" name="userStatus" value="Blocked">
+                      <label for="statusBlocked" class="option-label">Blocked</label>
+                      <input type="radio" id="statusPending" name="userStatus" value="Pending">
+                      <label for="statusPending" class="option-label">Pending</label>
+                    </td>
+                  </tr>
+                </table>
+              </fieldset>
+              <input type="submit" id="userSaveButton" class="btn" value="Add User">
+              <button type="button" class="btn btn-secondary" onclick="resetUserForm()">Cancel</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- READ + SEARCH table -->
+        <div class="col-wide">
+          <div class="card">
+            <h3>All Users</h3>
+            <div class="search-bar">
+              <input type="text" id="userSearch" placeholder="Search by name, username, email or id..." onkeyup="renderUsers()">
+              <select id="userRoleFilter" onchange="renderUsers()">
+                <option value="All">All roles</option>
+                <option value="Admin">Admin</option>
+                <option value="Agency Manager">Agency Manager</option>
+                <option value="Tour Guide">Tour Guide</option>
+                <option value="Tourist">Tourist</option>
+              </select>
+              <select id="userStatusFilter" onchange="renderUsers()">
+                <option value="All">Any status</option>
+                <option value="Active">Active</option>
+                <option value="Blocked">Blocked</option>
+                <option value="Pending">Pending approval</option>
+              </select>
+            </div>
+            <p class="result-count" id="userCount"></p>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="userTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         UNIQUE FEATURE 1: ACTION BY RATING
+         ========================================================= -->
+    <section id="ratingSection" class="page-section">
+      <h2 class="page-title">Action by Rating</h2>
+      <p class="page-subtitle">Packages and guides with low ratings are marked in red. Warn, disable or block them.</p>
+
+      <div id="ratingMessage" class="message"></div>
+
+      <div class="card">
+        <table class="form-table">
+          <tr>
+            <td><label for="ratingLimit">Rating limit (1 - 5):</label></td>
+            <td>
+              <input type="number" id="ratingLimit" min="1" max="5" step="0.5" value="3" onchange="renderRatings()" onkeyup="renderRatings()">
+              <input type="checkbox" id="onlyLow" onchange="renderRatings()">
+              <label for="onlyLow" class="option-label">Show only rows below the limit</label>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Tour packages</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Package</th><th>Average</th><th>Reviews</th><th>Status</th><th>Take action</th></tr>
+            </thead>
+            <tbody id="packageRatingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Tour guides</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Guide</th><th>Average</th><th>Ratings</th><th>Warnings</th><th>Status</th><th>Take action</th></tr>
+            </thead>
+            <tbody id="guideRatingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-wide">
+          <div class="card">
+            <h3>Low reviews (2 stars or less)</h3>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr><th>ID</th><th>Tourist</th><th>Tour</th><th>Guide</th><th>Comment</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="lowReviewBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3>Action history</h3>
+            <div class="notice-board" id="actionBoard"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         UNIQUE FEATURE 2: SEE REVENUE
+         ========================================================= -->
+    <section id="revenueSection" class="page-section">
+      <h2 class="page-title">See Revenue</h2>
+      <p class="page-subtitle">Money received from tourists, by month, by payment method and by package.</p>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="revTotal">0</div><div class="stat-label">Total revenue</div></div>
+        <div class="stat-card"><div class="stat-number" id="revMonth">0</div><div class="stat-label">This month</div></div>
+        <div class="stat-card"><div class="stat-number" id="revAverage">0</div><div class="stat-label">Average payment</div></div>
+        <div class="stat-card"><div class="stat-number" id="revDue">0</div><div class="stat-label">Due (approved, not paid)</div></div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3>Last 6 months</h3>
+            <div id="monthChart"></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3>By payment method</h3>
+            <div id="methodChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Revenue by package</h3>
+        <div id="packageRevenueChart"></div>
+      </div>
+
+      <div class="card">
+        <h3>All payments</h3>
+        <div class="search-bar">
+          <input type="text" id="paymentSearch" placeholder="Search by tourist, booking or transaction id..." onkeyup="renderPaymentList()">
+          <input type="date" id="paymentFrom" onchange="renderPaymentList()">
+          <input type="date" id="paymentTo" onchange="renderPaymentList()">
+          <select id="paymentMethodFilter" onchange="renderPaymentList()">
+            <option value="All">All methods</option>
+            <option value="bKash">bKash</option>
+            <option value="Nagad">Nagad</option>
+            <option value="Card">Card</option>
+          </select>
+        </div>
+        <p class="result-count" id="paymentCount"></p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Transaction</th><th>Tourist</th><th>Booking</th><th>Method</th><th>Amount</th><th>Date</th></tr>
+            </thead>
+            <tbody id="paymentListBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    &copy; 2026 TourBD Tour Management System &middot; CSC 3215 Web Technologies
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

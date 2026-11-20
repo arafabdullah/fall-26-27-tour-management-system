@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create a TourBD account">
+  <title>Register | TourBD Tour Management</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">Tour<span>BD</span></a>
+    <div class="user-info">
+      <a href="login.html" class="btn btn-small btn-light">Login</a>
+      <a href="register.html" class="btn btn-small">Register</a>
+    </div>
+  </header>
+
+  <!-- The same navigation bar on every public page.
+       Login and Register are buttons in the header, so they are not repeated here. -->
+  <nav class="topnav">
+    <a href="index.html">Home</a>
+    <a href="index.html#places">Popular Places</a>
+    <a href="index.html#search">Search Tours</a>
+    <a href="index.html#who">Who It's For</a>
+    <a href="index.html#how">How It Works</a>
+    <a href="index.html#contact">Contact Us</a>
+  </nav>
+
+  <main class="container">
+    <div class="auth-box wide">
+      <div class="card">
+        <h2 class="page-title">Create your account</h2>
+        <p class="page-subtitle">One registration page for tourists, tour guides and agency managers.
+          Choose who you are and the form will ask only for what we need. Fields marked * are required.</p>
+
+        <div id="registerMessage" class="message"></div>
+
+        <form id="registerForm" action="login.html" method="get" onsubmit="return validateRegister()">
+
+          <!-- ================= STEP 1: TYPE OF USER =================
+               Radio buttons share one name, so only one type can be picked.
+               onchange calls showTypeFields(), which shows the matching fieldset. -->
+          <fieldset>
+            <legend>Step 1 &middot; I want to register as *</legend>
+            <div class="type-grid">
+              <label class="type-option" id="typeCardTourist" for="typeTourist">
+                <input type="radio" id="typeTourist" name="userType" value="Tourist" onchange="showTypeFields()">
+                <strong>Tourist</strong>
+                <span class="hint">Book tours, pay online and rate your trip.</span>
+              </label>
+              <label class="type-option" id="typeCardGuide" for="typeGuide">
+                <input type="radio" id="typeGuide" name="userType" value="Tour Guide" onchange="showTypeFields()">
+                <strong>Tour Guide</strong>
+                <span class="hint">Lead tours and post notices. Needs admin approval.</span>
+              </label>
+              <label class="type-option" id="typeCardManager" for="typeManager">
+                <input type="radio" id="typeManager" name="userType" value="Agency Manager" onchange="showTypeFields()">
+                <strong>Agency Manager</strong>
+                <span class="hint">Manage packages, bookings and vehicles. Needs admin approval.</span>
+              </label>
+            </div>
+            <span class="error" id="userTypeError"></span>
+            <p class="hint">System admins are added by an existing admin from the Admin panel.</p>
+          </fieldset>
+
+          <!-- Everything below stays hidden until a type is chosen -->
+          <div id="formBody" class="form-body">
+
+            <!-- ================= STEP 2: COMMON DETAILS (every type) ================= -->
+            <fieldset>
+              <legend>Step 2 &middot; Personal information</legend>
+              <table class="form-table">
+                <tr>
+                  <td><label for="fullName">Full Name: *</label></td>
+                  <td>
+                    <input type="text" id="fullName" name="fullName" placeholder="Your full name">
+                    <span class="error" id="fullNameError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="email">Email: *</label></td>
+                  <td>
+                    <input type="email" id="email" name="email" placeholder="you@example.com">
+                    <span class="error" id="emailError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="phone">Phone: *</label></td>
+                  <td>
+                    <input type="tel" id="phone" name="phone" placeholder="11 digits, e.g. 01712345678">
+                    <span class="error" id="phoneError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Gender: *</td>
+                  <td>
+                    <input type="radio" id="genderMale" name="gender" value="Male">
+                    <label for="genderMale" class="option-label">Male</label>
+                    <input type="radio" id="genderFemale" name="gender" value="Female">
+                    <label for="genderFemale" class="option-label">Female</label>
+                    <input type="radio" id="genderOther" name="gender" value="Other">
+                    <label for="genderOther" class="option-label">Prefer not to say</label>
+                    <span class="error" id="genderError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="dob">Date of Birth: *</label></td>
+                  <td>
+                    <input type="date" id="dob" name="dob">
+                    <span class="error" id="dobError"></span>
+                  </td>
+                </tr>
+              </table>
+            </fieldset>
+
+            <!-- ================= STEP 3a: TOURIST ONLY ================= -->
+            <fieldset id="touristFields" class="type-fields">
+              <legend>Step 3 &middot; Tourist details</legend>
+              <table class="form-table">
+                <tr>
+                  <td><label for="nid">NID / Passport No: *</label></td>
+                  <td>
+                    <input type="text" id="nid" name="nid" placeholder="NID: 10, 13 or 17 digits">
+                    <span class="error" id="nidError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="nationality">Nationality: *</label></td>
+                  <td>
+                    <select id="nationality" name="nationality">
+                      <option value="">-- Select Nationality --</option>
+                      <option value="Bangladeshi">Bangladeshi</option>
+                      <option value="Indian">Indian</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <span class="error" id="nationalityError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="emergencyPhone">Emergency Contact: *</label></td>
+                  <td>
+                    <input type="tel" id="emergencyPhone" name="emergencyPhone" placeholder="Phone of a family member">
+                    <span class="error" id="emergencyPhoneError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>I like to visit:</td>
+                  <td>
+                    <input type="checkbox" id="intBeach" name="interest" value="Beach">
+                    <label for="intBeach" class="option-label">Beach</label>
+                    <input type="checkbox" id="intHill" name="interest" value="Hill">
+                    <label for="intHill" class="option-label">Hill</label>
+                    <input type="checkbox" id="intForest" name="interest" value="Forest">
+                    <label for="intForest" class="option-label">Forest</label>
+                    <input type="checkbox" id="intHeritage" name="interest" value="Heritage">
+                    <label for="intHeritage" class="option-label">Heritage</label>
+                  </td>
+                </tr>
+              </table>
+            </fieldset>
+
+            <!-- ================= STEP 3b: TOUR GUIDE ONLY ================= -->
+            <fieldset id="guideFields" class="type-fields">
+              <legend>Step 3 &middot; Tour guide details</legend>
+              <table class="form-table">
+                <tr>
+                  <td><label for="licenseNo">Guide License No: *</label></td>
+                  <td>
+                    <input type="text" id="licenseNo" name="licenseNo" placeholder="e.g. GL-1234">
+                    <span class="error" id="licenseNoError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="expertise">Area of Expertise: *</label></td>
+                  <td>
+                    <select id="expertise" name="expertise">
+                      <option value="">-- Select Area --</option>
+                      <option value="Beach">Beach</option>
+                      <option value="Hill Tracks">Hill Tracks</option>
+                      <option value="Forest and Tea Garden">Forest and Tea Garden</option>
+                      <option value="City Tour">City Tour</option>
+                    </select>
+                    <span class="error" id="expertiseError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="experience">Experience (years): *</label></td>
+                  <td>
+                    <input type="number" id="experience" name="experience" min="0" max="40" placeholder="0 - 40">
+                    <span class="error" id="experienceError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Languages: *</td>
+                  <td>
+                    <input type="checkbox" id="langBangla" name="language" value="Bangla">
+                    <label for="langBangla" class="option-label">Bangla</label>
+                    <input type="checkbox" id="langEnglish" name="language" value="English">
+                    <label for="langEnglish" class="option-label">English</label>
+                    <input type="checkbox" id="langHindi" name="language" value="Hindi">
+                    <label for="langHindi" class="option-label">Hindi</label>
+                    <input type="checkbox" id="langArabic" name="language" value="Arabic">
+                    <label for="langArabic" class="option-label">Arabic</label>
+                    <span class="error" id="languageError"></span>
+                  </td>
+                </tr>
+              </table>
+              <p class="hint">Guide accounts are checked by an admin. You can log in after approval.</p>
+            </fieldset>
+
+            <!-- ================= STEP 3c: AGENCY MANAGER ONLY ================= -->
+            <fieldset id="managerFields" class="type-fields">
+              <legend>Step 3 &middot; Agency manager details</legend>
+              <table class="form-table">
+                <tr>
+                  <td><label for="employeeId">Employee ID: *</label></td>
+                  <td>
+                    <input type="text" id="employeeId" name="employeeId" placeholder="e.g. EMP-1234">
+                    <span class="error" id="employeeIdError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Branch: *</td>
+                  <td>
+                    <input type="radio" id="branchDhaka" name="branch" value="Dhaka">
+                    <label for="branchDhaka" class="option-label">Dhaka</label>
+                    <input type="radio" id="branchCtg" name="branch" value="Chattogram">
+                    <label for="branchCtg" class="option-label">Chattogram</label>
+                    <input type="radio" id="branchSylhet" name="branch" value="Sylhet">
+                    <label for="branchSylhet" class="option-label">Sylhet</label>
+                    <span class="error" id="branchError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="designation">Designation: *</label></td>
+                  <td>
+                    <select id="designation" name="designation">
+                      <option value="">-- Select Designation --</option>
+                      <option value="Operations Manager">Operations Manager</option>
+                      <option value="Booking Manager">Booking Manager</option>
+                      <option value="Branch Manager">Branch Manager</option>
+                    </select>
+                    <span class="error" id="designationError"></span>
+                  </td>
+                </tr>
+              </table>
+              <p class="hint">Manager accounts are checked by an admin. You can log in after approval.</p>
+            </fieldset>
+
+            <!-- ================= STEP 4: ACCOUNT (every type) ================= -->
+            <fieldset>
+              <legend>Step 4 &middot; Login details</legend>
+              <table class="form-table">
+                <tr>
+                  <td><label for="newUsername">Username: *</label></td>
+                  <td>
+                    <input type="text" id="newUsername" name="newUsername" placeholder="At least 4 characters, no spaces">
+                    <span class="error" id="newUsernameError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="newPassword">Password: *</label></td>
+                  <td>
+                    <input type="password" id="newPassword" placeholder="At least 8 characters with a digit" onkeyup="showPasswordStrength()">
+                    <span class="hint" id="strengthText"></span>
+                    <span class="error" id="newPasswordError"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="confirmPassword">Confirm Password: *</label></td>
+                  <td>
+                    <input type="password" id="confirmPassword" placeholder="Type the password again">
+                    <span class="error" id="confirmPasswordError"></span>
+                  </td>
+                </tr>
+              </table>
+            </fieldset>
+
+            <!-- DHTML example from Lecture 01: the button stays disabled until the box is ticked -->
+            <p>
+              <input type="checkbox" id="terms" name="terms" onchange="toggleRegisterButton()">
+              <label for="terms" class="option-label">I agree to the TourBD rules and terms *</label>
+            </p>
+
+            <div class="form-buttons">
+              <input type="submit" id="registerButton" class="btn" value="Create Account" disabled>
+              <input type="reset" class="btn btn-secondary" value="Start Again" onclick="resetRegisterForm()">
+            </div>
+          </div>
+        </form>
+
+        <p class="auth-switch">Already have an account? <a href="login.html">Login here</a></p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    &copy; 2026 TourBD Tour Management System &middot; CSC 3215 Web Technologies
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>
