@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tour guide dashboard of TourBD">
+  <title>Tour Guide Dashboard | TourBD Tour Management</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">Tour<span>BD</span></a>
+    <div class="user-info">
+      <span class="badge guide">Tour Guide</span>
+      <span>Welcome, <span id="welcomeName">Guide</span></span>
+      <a href="index.html" class="btn btn-small btn-light">Logout</a>
+    </div>
+  </header>
+
+  <nav class="topnav">
+    <button type="button" id="nav-scheduleSection" onclick="showSection('scheduleSection')">Assigned Tour Schedule</button>
+    <button type="button" id="nav-routeSection" onclick="showSection('routeSection')">Customized Route Change</button>
+    <button type="button" id="nav-noticesSection" onclick="showSection('noticesSection')">Guidelines &amp; Notices</button>
+  </nav>
+
+  <main class="container">
+
+    <!-- =========================================================
+         UNIQUE FEATURE 1: ASSIGNED TOUR SCHEDULE
+         ========================================================= -->
+    <section id="scheduleSection" class="page-section">
+      <h2 class="page-title">Assigned Tour Schedule</h2>
+      <p class="page-subtitle" id="scheduleSummary"></p>
+
+      <div id="scheduleMessage" class="message"></div>
+      <div id="adminWarnings"></div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="statUpcoming">0</div><div class="stat-label">Upcoming tours</div></div>
+        <div class="stat-card"><div class="stat-number" id="statRunning">0</div><div class="stat-label">In progress</div></div>
+        <div class="stat-card"><div class="stat-number" id="statDone">0</div><div class="stat-label">Completed</div></div>
+        <div class="stat-card"><div class="stat-number" id="statRating">-</div><div class="stat-label">My rating (out of 5)</div></div>
+      </div>
+
+      <div class="card">
+        <h3>My tours</h3>
+        <div class="search-bar">
+          <select id="scheduleFilter" onchange="renderSchedule()">
+            <option value="Upcoming">Upcoming tours</option>
+            <option value="Completed">Completed tours</option>
+            <option value="All">All tours</option>
+          </select>
+        </div>
+        <div id="scheduleList"></div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         UNIQUE FEATURE 2: CUSTOMIZED ROUTE CHANGE
+         ========================================================= -->
+    <section id="routeSection" class="page-section">
+      <h2 class="page-title">Customized Route Change</h2>
+      <p class="page-subtitle">Add, remove or reorder the stops of a tour. Tourists will see the new route.</p>
+
+      <div id="routeMessage" class="message"></div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3>Choose a tour</h3>
+            <table class="form-table">
+              <tr>
+                <td><label for="routeTour">Tour:</label></td>
+                <td>
+                  <select id="routeTour" onchange="loadRouteStops()"></select>
+                  <span class="error" id="routeTourError"></span>
+                </td>
+              </tr>
+            </table>
+            <div class="result-box" id="routeInfo">Choose a tour to edit its route.</div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <h3>Edit stops</h3>
+            <form id="routeForm" onsubmit="return saveRoute()">
+              <ol id="stopList" class="stop-list"></ol>
+              <span class="error" id="stopListError"></span>
+
+              <div class="search-bar">
+                <input type="text" id="newStop" placeholder="New stop, e.g. Lawachara Forest">
+                <button type="button" class="btn" onclick="addStop()">Add Stop</button>
+              </div>
+              <span class="error" id="newStopError"></span>
+
+              <table class="form-table">
+                <tr>
+                  <td><label for="routeReasonType">Reason:</label></td>
+                  <td>
+                    <select id="routeReasonType" onchange="fillReason()">
+                      <option value="">-- Select Reason --</option>
+                      <option value="Bad weather / heavy rain">Bad weather / heavy rain</option>
+                      <option value="Road closed or under repair">Road closed or under repair</option>
+                      <option value="Tourists asked for another place">Tourists asked for another place</option>
+                      <option value="Running late, skipping a stop">Running late, skipping a stop</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="routeReason">Details:</label></td>
+                  <td>
+                    <textarea id="routeReason" rows="3" cols="30" placeholder="Why are you changing the route?"></textarea>
+                    <span class="error" id="routeReasonError"></span>
+                  </td>
+                </tr>
+              </table>
+
+              <input type="submit" class="btn btn-success" value="Save New Route">
+              <button type="button" class="btn btn-secondary" onclick="loadRouteStops()">Undo Changes</button>
+              <button type="button" class="btn btn-danger" onclick="resetToPackageRoute()">Back to Package Route</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Route change history</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Booking</th><th>Old route</th><th>New route</th><th>Reason</th><th>Date</th></tr>
+            </thead>
+            <tbody id="routeHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         UNIQUE FEATURE 3: GUIDELINES & NOTICES
+         Create, Read, Update, Delete and Search
+         ========================================================= -->
+    <section id="noticesSection" class="page-section">
+      <h2 class="page-title">Tour Guidelines &amp; Notices</h2>
+      <p class="page-subtitle">Post meeting points, safety rules and things to carry. Tourists of that tour see them.</p>
+
+      <div id="noticeMessage" class="message"></div>
+
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h3 id="noticeFormTitle">New Notice</h3>
+            <form id="noticeForm" onsubmit="return saveNotice()">
+              <fieldset>
+                <legend>Notice</legend>
+                <table class="form-table">
+                  <tr>
+                    <td><label for="noticeTour">For tour:</label></td>
+                    <td>
+                      <select id="noticeTour"></select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Quick text:</td>
+                    <td>
+                      <button type="button" class="btn btn-small btn-secondary" onclick="useTemplate('meeting')">Meeting point</button>
+                      <button type="button" class="btn btn-small btn-secondary" onclick="useTemplate('safety')">Safety</button>
+                      <button type="button" class="btn btn-small btn-secondary" onclick="useTemplate('carry')">Things to carry</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><label for="noticeText">Notice:</label></td>
+                    <td>
+                      <textarea id="noticeText" rows="4" cols="30" placeholder="Write the instruction for tourists..." onkeyup="countNoticeCharacters()"></textarea>
+                      <span class="hint" id="noticeCounter">0 / 250</span>
+                      <span class="error" id="noticeTextError"></span>
+                    </td>
+                  </tr>
+                </table>
+              </fieldset>
+              <input type="submit" id="noticeSaveButton" class="btn" value="Post Notice">
+              <button type="button" class="btn btn-secondary" onclick="resetNoticeForm()">Cancel</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-wide">
+          <div class="card">
+            <h3>My notices</h3>
+            <div class="search-bar">
+              <input type="text" id="noticeSearch" placeholder="Search notices..." onkeyup="renderNotices()">
+              <select id="noticeTourFilter" onchange="renderNotices()">
+                <option value="All">All notices</option>
+                <option value="General">General only</option>
+                <option value="Tour">For a tour only</option>
+              </select>
+            </div>
+            <p class="result-count" id="noticeCount"></p>
+            <div class="notice-board" id="noticeBoard"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    &copy; 2026 TourBD Tour Management System &middot; CSC 3215 Web Technologies
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/guide.js"></script>
+</body>
+</html>

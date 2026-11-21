@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="TourBD: search tour packages in Bangladesh, book online and travel with a local guide">
+  <title>Home | TourBD Tour Management</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="header">
+    <a href="index.html" class="logo">Tour<span>BD</span></a>
+    <div class="user-info">
+      <a href="login.html" class="btn btn-small btn-light">Login</a>
+      <a href="register.html" class="btn btn-small">Register</a>
+    </div>
+  </header>
+
+  <!-- The same navigation bar on every public page.
+       Login and Register are buttons in the header, so they are not repeated here. -->
+  <nav class="topnav">
+    <a href="index.html" class="active">Home</a>
+    <a href="#places">Popular Places</a>
+    <a href="#search">Search Tours</a>
+    <a href="#who">Who It's For</a>
+    <a href="#how">How It Works</a>
+    <a href="#contact">Contact Us</a>
+  </nav>
+
+  <!-- ============ HERO with the package search ============ -->
+  <div class="hero">
+    <h1>Explore Bangladesh with us</h1>
+    <p>Find a tour package, book it in a minute and travel with a trained local guide.</p>
+
+    <!-- Typing here filters the results below right away (onkeyup) -->
+    <div class="hero-search">
+      <input type="text" id="catalogSearch" placeholder="Search by place, package or stop..." onkeyup="renderCatalog()">
+      <select id="catalogCategory" onchange="renderCatalog()">
+        <option value="All">All categories</option>
+        <option value="Beach">Beach</option>
+        <option value="Hill">Hill</option>
+        <option value="Eco-Tour">Eco-Tour</option>
+        <option value="City Tour">City Tour</option>
+      </select>
+      <select id="catalogBudget" onchange="renderCatalog()">
+        <option value="0">Any budget</option>
+        <option value="2000">Up to 2,000 Tk</option>
+        <option value="7000">Up to 7,000 Tk</option>
+        <option value="10000">Up to 10,000 Tk</option>
+      </select>
+    </div>
+    <p class="hero-note">No account needed to search. <a href="#search" class="hero-link">See the results &darr;</a></p>
+  </div>
+
+  <main class="container">
+
+    <!-- ============ WHY TOURBD ============ -->
+    <div class="feature-strip">
+      <div class="feature">
+        <span class="feature-icon">1</span>
+        <h3>One account</h3>
+        <p>Register once and log in from a single page, whoever you are.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">Tk</span>
+        <h3>Easy payment</h3>
+        <p>Pay with bKash, Nagad or card after your booking is approved.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">&#9733;</span>
+        <h3>Rated guides</h3>
+        <p>Every tour is rated, so we keep only the best guides.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">24</span>
+        <h3>Support</h3>
+        <p>Send a special request and the agency will reply.</p>
+      </div>
+    </div>
+
+    <!-- ============ POPULAR PLACES ============ -->
+    <section id="places" class="home-section">
+      <div class="section-heading">
+        <h2>Popular places</h2>
+        <p>Our most booked tours this year.</p>
+      </div>
+      <div class="place-grid">
+        <div class="place-card">
+          <img src="images/coxsbazar.jpg" alt="Cox's Bazar sea beach">
+          <div class="place-body">
+            <h3>Cox's Bazar</h3>
+            <p class="hint">3 days &middot; Beach</p>
+            <p>The longest natural sea beach in the world.</p>
+            <p class="price">9,500 Tk / person</p>
+          </div>
+        </div>
+        <div class="place-card">
+          <img src="images/sajek.jpg" alt="Sajek valley above the clouds">
+          <div class="place-body">
+            <h3>Sajek Valley</h3>
+            <p class="hint">2 days &middot; Hill</p>
+            <p>Sleep above the clouds in the hills of Rangamati.</p>
+            <p class="price">7,000 Tk / person</p>
+          </div>
+        </div>
+        <div class="place-card">
+          <img src="images/sylhet.jpg" alt="Tea garden in Sylhet">
+          <div class="place-body">
+            <h3>Sylhet</h3>
+            <p class="hint">3 days &middot; Eco-Tour</p>
+            <p>Green tea gardens, Ratargul swamp forest and Lalakhal.</p>
+            <p class="price">8,500 Tk / person</p>
+          </div>
+        </div>
+        <div class="place-card">
+          <img src="images/kuwakata.jpg" alt="Kuakata sea beach">
+          <div class="place-body">
+            <h3>Kuakata</h3>
+            <p class="hint">2 days &middot; Beach</p>
+            <p>See both sunrise and sunset from the same beach.</p>
+            <p class="price">6,500 Tk / person</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SEARCH RESULTS ============ -->
+    <section id="search" class="home-section">
+      <div class="section-heading">
+        <h2>All tour packages</h2>
+        <p>Type in the search box above, or pick a category and a budget.</p>
+      </div>
+      <div class="card">
+        <p class="result-count" id="catalogCount"></p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Package</th>
+                <th>Destination</th>
+                <th>Category</th>
+                <th>Duration</th>
+                <th>Price / person</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody id="catalogBody"></tbody>
+          </table>
+        </div>
+        <p class="hint">Want to book one? <a href="register.html">Create a free tourist account</a> or
+          <a href="login.html">log in</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ WHO IT'S FOR ============ -->
+    <section id="who" class="home-section">
+      <div class="section-heading">
+        <h2>Who is TourBD for?</h2>
+        <p>Choose your type when you register. Everyone logs in from the same page.</p>
+      </div>
+
+      <div class="role-grid">
+        <div class="role-card tourist">
+          <span class="badge tourist">Tourist</span>
+          <h3>Tourists</h3>
+          <ul>
+            <li>Search and book tour packages</li>
+            <li>Pay with bKash, Nagad or card</li>
+            <li>Rate the tour and the guide</li>
+            <li>Send special requests</li>
+          </ul>
+          <a href="register.html" class="btn btn-success">Register as Tourist</a>
+        </div>
+
+        <div class="role-card guide">
+          <span class="badge guide">Tour Guide</span>
+          <h3>Tour Guides</h3>
+          <ul>
+            <li>See the assigned tour schedule</li>
+            <li>Change the route when needed</li>
+            <li>Post guidelines and notices</li>
+            <li>Update the tour status</li>
+          </ul>
+          <a href="register.html" class="btn btn-success">Apply as Guide</a>
+        </div>
+
+        <div class="role-card manager">
+          <span class="badge manager">Agency Manager</span>
+          <h3>Agency Managers</h3>
+          <ul>
+            <li>Manage tour packages</li>
+            <li>Approve or reject bookings</li>
+            <li>Assign guides to tours</li>
+            <li>Book vehicles for tours</li>
+          </ul>
+          <a href="register.html" class="btn btn-success">Apply as Manager</a>
+        </div>
+
+        <div class="role-card admin">
+          <span class="badge admin">Admin</span>
+          <h3>System Admin</h3>
+          <ul>
+            <li>Manage every account</li>
+            <li>Take action by rating</li>
+            <li>See the revenue</li>
+            <li>Analytics and reports</li>
+          </ul>
+          <a href="login.html" class="btn">Admin Login</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section id="how" class="home-section">
+      <div class="section-heading">
+        <h2>How it works</h2>
+        <p>Four simple steps.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="step-number">1</span>
+          <h3>Register</h3>
+          <p>Open <a href="register.html">Register</a>, choose Tourist, Tour Guide or Agency Manager,
+            and fill in the details that type needs.</p>
+        </div>
+        <div class="step">
+          <span class="step-number">2</span>
+          <h3>Book a tour</h3>
+          <p>Pick a package and a travel date. The agency manager checks the seats and approves it.</p>
+        </div>
+        <div class="step">
+          <span class="step-number">3</span>
+          <h3>Pay</h3>
+          <p>Pay online after approval. A guide and a vehicle are assigned to your tour.</p>
+        </div>
+        <div class="step">
+          <span class="step-number">4</span>
+          <h3>Travel and rate</h3>
+          <p>Enjoy the tour, then rate the package and your guide.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACT US ============ -->
+    <div class="row">
+      <section id="contact" class="col home-section">
+        <div class="card">
+          <h3>Contact Us</h3>
+          <p><strong>TourBD Travel Agency</strong></p>
+          <table class="contact-table">
+            <tr>
+              <td>Address:</td>
+              <td>AIUB, Dhaka 1213, Bangladesh</td>
+            </tr>
+            <tr>
+              <td>Phone:</td>
+              <td>+880 1307196744</td>
+            </tr>
+            <tr>
+              <td>Email:</td>
+              <td><a href="mailto:info@tourbd.com">info@tourbd.com</a></td>
+            </tr>
+          </table>
+          <p class="hint">Office hours: Saturday to Thursday, 9 AM - 7 PM.</p>
+        </div>
+      </section>
+
+      <section class="col home-section">
+        <div class="card">
+          <h3>Booking rules</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Rule</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Payment</td>
+                <td>Only after the booking is approved</td>
+              </tr>
+              <tr>
+                <td>Cancel</td>
+                <td>Free while the booking is pending</td>
+              </tr>
+              <tr>
+                <td>Persons</td>
+                <td>1 to 10 persons in one booking</td>
+              </tr>
+              <tr>
+                <td>Review</td>
+                <td>After the tour is completed</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <section class="home-section">
+      <div class="cta-band">
+        <h2>Ready for your next trip?</h2>
+        <p>It takes less than two minutes to create an account.</p>
+        <a href="register.html" class="btn btn-light">Create an account</a>
+        <a href="login.html" class="btn btn-secondary">I already have one</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    &copy; 2026 TourBD Tour Management System &middot; CSC 3215 Web Technologies
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/home.js"></script>
+</body>
+
+</html>
